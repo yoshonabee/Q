@@ -19,7 +19,7 @@ LR = 0.001
 
 ITER = 4000000
 BUFFER_LIMIT = 1000
-BATCH_SIZE = 2
+BATCH_SIZE = 1
 
 height = int(args.height)
 width = int(args.weight)
@@ -51,6 +51,11 @@ for i in range(ITER):
     states = torch.cat([batch[j].states.unsqueeze(0) for j in range(BATCH_SIZE)])
     action = torch.cat([batch[j].action.unsqueeze(0) for j in range(BATCH_SIZE)])
     reward = torch.tensor([batch[j].reward for j in range(BATCH_SIZE)]).view(-1, 1)
+    
+    if cuda:
+        states = states.cuda()
+        action = action.cuda()
+        reward = reward.cuda()
 
     states = states.view(agent_num, 4, BATCH_SIZE, 3, 32, 32)
 
