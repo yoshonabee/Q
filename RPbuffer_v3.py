@@ -9,6 +9,7 @@ from model import *
 from lib.game.game import Game, Command
 from lib.game.agent import Agent
 from time import sleep
+import matplotlib.pyplot as plt
 #--------------------------------------------------------------------------------
 #acting.py is the class for collect the training data from the game
 #--------------------------------------------------------------------------------
@@ -16,10 +17,11 @@ RANDOM_THRES = 0.1
 
 
 class Data:
-    def __init__(self, states, action, reward):
+    def __init__(self, states, action, reward, scores):
         self.states = states
         self.action = action
         self.reward = reward
+        self.scores = scores
 
 class ReplayBuffer():
     def __init__(self, agent_num, height, width, model, modelpath, game_round):
@@ -44,6 +46,7 @@ class ReplayBuffer():
         self.crash_time_penalty = -0.0001
         self.crash_sum = -400
 
+        self.action = torch.tensor([random.randint(0, 4) for i in range(self.agent_numbers)])
         self.memory = []
         self.buffer_limit = 1000
 
@@ -51,7 +54,7 @@ class ReplayBuffer():
         self.score = 0
         self.initialGame()
 
-    def collect(self):
+    def collect(self, verbose=1):
         self.loadWeight()
         if self.game.active and self.game.state < self.game_round:
             #observe part of the bot
@@ -68,11 +71,16 @@ class ReplayBuffer():
             
             score = self.game.outputScore()
             reward = score - self.score
-            self.score = score
-            print(score)
+            
 
-            data = Data(self.states, action, reward)
+            if verbose == 1:
+                print(score)
+
+            data = Data(self.states, self.action, reward, self.score)
             self.memory.append(data)
+
+            self.action = action
+            self.score = score
 
             if len(self.memory) > self.buffer_limit:
                 self.memory.remove(self.memory[0])
@@ -84,7 +92,19 @@ class ReplayBuffer():
         if random.random() < RANDOM_THRES:
             return torch.tensor([random.randint(0, 4) for i in range(self.agent_numbers)])
         else:
-            return self.model(self.states[1:].unsqueeze(0)).max(2)[1].view(self.agent_numbers)
+            with torch.no_grad():
+                return self.model(self.states[1:].unsqueeze(0)).max(2)[1].view(self.agent_numbers)
+
+    def save_state(self, path):
+        for i in range(self.agent_numbers):
+            img = np.zeros([32, 32, 3], dtype=np.uint8)
+            arr = self.game.outputAgentImage(i)
+            img[:,:,0] = arr[0,:,:]
+            img[:,:,1] = arr[1,:,:]
+            img[:,:,2] = arr[2,:,:]
+            plt.subplot(2,2,i + 1)
+            plt.imshow(img)
+        plt.show()
 
     def play(self, model, game_round):
         while self.game.active and self.game.state < game_round:
@@ -95,11 +115,8 @@ class ReplayBuffer():
             s = torch.from_numpy(s)
             self.states[3] = s
 
-            s = self.states.view(3, 4, 1, 3, self.height, self.width)
-            reward = model(s, self.agent_numbers)
-            reward = torch.cat(reward).view(self.agent_numbers, -1)
-            action = reward.max(1)[1]
-            
+            action = model(self.states[1:].unsqueeze(0)).max(2)[1].view(self.agent_numbers)
+            print(action)
             action = [intoCommand(i, action[i]) for i in range(self.agent_numbers)]
             self.game.runOneRound(action)
             print(self.game.outputScore())
