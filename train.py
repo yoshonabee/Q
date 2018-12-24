@@ -20,6 +20,7 @@ LR = 0.0001
 ITER = 4000000
 BUFFER_LIMIT = 1000
 BATCH_SIZE = 1
+TARGET_UPDATE = 10
 
 height = int(args.height)
 width = int(args.weight)
@@ -29,9 +30,10 @@ if args.cuda != 'default':
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
     cuda = True
 
-buff = ReplayBuffer(agent_num, height, width, 128)
+buff = ReplayBuffer(agent_num, height, width, DQN(), args.model_path, 128)
 
-model = DQN(height, width)
+model = DQN()
+target_model = DQN()
 criterion = nn.MSELoss()
 optim = RMSprop(model.parameters(), lr=LR)
 
@@ -58,20 +60,21 @@ for i in range(ITER):
         action = action.cuda()
         reward = reward.cuda()
 
-    states = states.view(agent_num, 4, BATCH_SIZE, 3, 32, 32)
-
     action = action.long().view(BATCH_SIZE, agent_num, 1)
-    scores = model(states, action, agent_num)
+    pred_scores = model(states[:,0:3]).gather(2, action) #(batch, agent, 1)
+    pred_scores = torch.mean(pred_scores.view(-1, 1), 1) #(batch, 1)
+    target_scores = target_model(states[:,1:4]).max(2)[0].view(-1, 1) #(batch, agent, 1)
+    target_scores = torch.mean(target_scores.view(-1, 1), 1) #(batch, 1)
 
-    scores = torch.cat(scores).view(BATCH_SIZE, agent_num, -1)
+    pred_scores = pred_scores * 0.999 + reward
 
-    scores = scores.gather(2, action)
-    scores = torch.mean(scores, 1)
-
-    loss = criterion(scores, reward)
+    loss = criterion(pred_scores, target_scores)
     optim.zero_grad()
     loss.backward()
     optim.step()
+
+    if i % TARGET_UPDATE == 0:
+        target_model.load_state_dict(model.state_dict())
 
     if (i + 1) % 100 == 0:
         print('Iter:%d | loss:%.4f' %(i + 1, loss.item()))

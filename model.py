@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 class DQN(nn.Module):
-    def __init__(self, height, width):
+    def __init__(self):
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, 3, stride=1, padding=2)
         self.maxp1 = nn.MaxPool2d(2, 2)
@@ -22,16 +22,21 @@ class DQN(nn.Module):
         self.conv3 = nn.Conv2d(16, 32, 3, stride=1, padding=1)
         self.maxp3 = nn.MaxPool2d(2, 2)
 
-        self.linear = nn.Linear(2048, 5)
+        self.linear = nn.Linear(1536, 5)
 
-    def forward(self, states, action, agent_numbers):
+    def forward(self, states):
+        #shape of states: (batch, state_num, agent, 3, height, width)
         scores = []
+        for agent in range(states.shape[2]):
+            s1 = states[:,0,agent,:] #(batch, 3, 32, 32)
+            s2 = states[:,1,agent,:] #(batch, 3, 32, 32)
+            s3 = states[:,2,agent,:] #(batch, 3, 32, 32)
 
-        for i in range(agent_numbers):
-            x = torch.cat([self.conv(states[i][:][s]) for s in range(4)], 1)
-            x = self.linear(x).unsqueeze(0)
+            x = torch.cat([self.conv(s1), self.conv(s2), self.conv(s3)], 1)
+            x = self.linear(x).unsqueeze(1) #(batch, 1, 5)
             scores.append(x)
 
+        scores = torch.cat(scores, 1) #(batch, agent, 5)
         return scores
 
     def conv(self, s):
