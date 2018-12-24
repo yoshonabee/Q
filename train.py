@@ -15,7 +15,7 @@ args = get_args()
 keep_train = True
 cuda = False
 
-LR = 0.001
+LR = 0.0001
 
 ITER = 4000000
 BUFFER_LIMIT = 1000
@@ -36,7 +36,8 @@ criterion = nn.MSELoss()
 optim = RMSprop(model.parameters(), lr=LR)
 
 if args.keep_train != 'default':
-    model.load_state_dict(torch.load(sys.argv[1]))
+    print(f'keep training, modelpath: {args.model_path}')
+    model.load_state_dict(torch.load(args.model_path))
 
 if cuda:
     model.cuda()
@@ -76,5 +77,5 @@ for i in range(ITER):
         print('Iter:%d | loss:%.4f' %(i + 1, loss.item()))
 
     if (i + 1) % 1000 == 0:
-        torch.save(model.state_dict(), sys.argv[1])
+        torch.save(model.state_dict(), args.model_path)
 
