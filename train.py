@@ -91,7 +91,7 @@ for i in range(ITER):
     loss = F.smooth_l1_loss(pred_scores, target_scores)
 
     loss += 0.01 * reg
-    
+
     optim.zero_grad()
     loss.backward()
     for param in model.parameters():
@@ -106,5 +106,5 @@ for i in range(ITER):
     if (i + 1) % 1 == 0:
         print('Iter:%d | loss:%.4f | scores:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), scores.item(), pred_scores.item(), target_scores.item()))
     
-    if (i + 100) % 1 == 0:
+    if (i + 1) % 100 == 0:
         torch.save(model.state_dict(), args.model_path)
