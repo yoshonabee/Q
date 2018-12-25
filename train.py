@@ -72,7 +72,11 @@ for i in range(ITER):
     pred_scores = model(states[:,:3]).gather(2, action) #(batch, agent, 1)
     pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
-    target_scores = torch.zeros([BATCH_SIZE, agent_num, 5], dtype=torch.float32)
+    if cuda:
+        target_scores = torch.zeros([BATCH_SIZE, agent_num, 5], dtype=torch.float32).cuda()
+    else:
+        target_scores = torch.zeros([BATCH_SIZE, agent_num, 5], dtype=torch.float32).cuda()
+        
     for j in range(BATCH_SIZE):
         if done[j] is not True:
             target_scores[j] = target_model(states[j,1:].unsqueeze(0)).squeeze(0).max(1)[0].view(-1) #(batch, agent, 1)
