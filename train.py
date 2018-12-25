@@ -87,10 +87,7 @@ for i in range(ITER):
 
     target_scores = target_scores * 0.999 + reward
 
-    reg = criterion(pred_scores, scores)
     loss = F.smooth_l1_loss(pred_scores, target_scores)
-
-    loss += 0.01 * reg
 
     optim.zero_grad()
     loss.backward()
