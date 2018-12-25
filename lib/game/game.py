@@ -77,13 +77,14 @@ class Game():
             self.consolemap.updateObstacles(foundObstacles)
             self.consolemap.updateAgent(agent) # must at the end
 
-        collected_targets_ratio = 1 - (len(self.godmap.targets) + len(self.consolemap.targets)) / self.targets_number
-        active_counting = 0
-        for i in range(len(self.consolemap.agents)):
-            if self.consolemap.agents[i].active:
-                active_counting += 1
-        dead_ratio = 1 - active_counting / self.agents_number
         #check the game is still playing or not
+        for i in range(len(self.consolemap.agents)):
+            if self.consolemap.agents[i].active is False:
+                self.active = False
+                break
+        # dead_ratio = 1 - active_counting / self.agents_number
+        
+        collected_targets_ratio = 1 - (len(self.godmap.targets) + len(self.consolemap.targets)) / self.targets_number
         if collected_targets_ratio == 1 or dead_ratio >= 0.8:
             self.active = False
     
