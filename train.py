@@ -73,8 +73,7 @@ for i in range(ITER):
     pred_scores = model(states[:,:3]).gather(2, action) #(batch, agent, 1)
     pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
-    target_scores = target_model(states[:,1:]).max(2)[0].view(-1, 1) #(batch, agent, 1)
-    target_scores = F.relu(target_scores)
+    target_scores = F.relu(target_model(states[:,1:])).max(2)[0].view(-1, 1) #(batch, agent, 1)
     target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
     target_scores = target_scores * 0.999 + reward
