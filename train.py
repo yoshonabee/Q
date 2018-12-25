@@ -89,7 +89,7 @@ for i in range(ITER):
     if i % TARGET_UPDATE == 0:
         target_model.load_state_dict(model.state_dict())
 
-    if (i + 1) % 100 == 0:
+    if (i + 1) % 1 == 0:
         print('Iter:%d | loss:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), pred_scores.item(), target_scores.item()))
     
     if (i + 1) % 100 == 0:
