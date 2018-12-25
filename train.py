@@ -101,7 +101,7 @@ for i in range(ITER):
         target_model.load_state_dict(model.state_dict())
 
     if (i + 1) % 100 == 0:
-        print('Iter:%d | loss:%.4f | scores:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), scores.item(), pred_scores.item(), target_scores.item()))
+        print('Iter:%d | loss:%.4f | scores:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), scores[0].item(), pred_scores[0].item(), target_scores[0].item()))
     
     if (i + 1) % 100 == 0:
         torch.save(model.state_dict(), args.model_path)
