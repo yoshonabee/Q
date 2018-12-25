@@ -55,8 +55,8 @@ class ReplayBuffer():
         self.score = 0
         self.initialGame()
 
-    def collect(self, verbose=1):
-        self.loadWeight()
+    def collect(self, model, verbose=1):
+        self.model = model
         if self.game.active and self.game.state < self.game_round:
             #observe part of the bot
             action = self.select_action()

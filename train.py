@@ -49,7 +49,7 @@ if cuda:
 action = torch.zeros([BATCH_SIZE, agent_num])
 
 for i in range(ITER):
-    buff.collect(0)
+    buff.collect(model, 0)
 
     if len(buff.memory) < BATCH_SIZE: continue
 
@@ -73,7 +73,7 @@ for i in range(ITER):
     pred_scores = model(states[:,:3]).gather(2, action) #(batch, agent, 1)
     pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
-    target_scores = F.relu(target_model(states[:,1:])).max(2)[0].view(-1, 1) #(batch, agent, 1)
+    target_scores = target_model(states[:,1:]).max(2)[0].view(-1, 1) #(batch, agent, 1)
     target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
     target_scores = target_scores * 0.999 + reward
@@ -92,5 +92,5 @@ for i in range(ITER):
     if (i + 1) % 1 == 0:
         print('Iter:%d | loss:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), pred_scores.item(), target_scores.item()))
     
-    if (i + 1) % 1 == 0:
+    if (i + 100) % 1 == 0:
         torch.save(model.state_dict(), args.model_path)
