@@ -17,14 +17,14 @@ RANDOM_THRES = 0.1
 
 
 class Data:
-    def __init__(self, states, action, reward, scores):
+    def __init__(self, states, action, reward):
         self.states = states
         self.action = action
         self.reward = reward
-        self.scores = scores
+        # self.scores = scores
 
 class ReplayBuffer():
-    def __init__(self, agent_num, height, width, model, modelpath, game_round):
+    def __init__(self, agent_num, height, width, model, modelpath, game_round, cuda=True):
         #initial the model in the replay buffer
         #model is be defined using pytorch lib
 
@@ -35,6 +35,7 @@ class ReplayBuffer():
         self.agent_numbers = agent_num
         self.model = model
         self.modelpath = modelpath
+        self.cuda = cuda
 
         self.states = torch.zeros([4, self.agent_numbers, 3, self.height, self.width], dtype=torch.float32)
 
@@ -46,7 +47,7 @@ class ReplayBuffer():
         self.crash_time_penalty = -0.0001
         self.crash_sum = -400
 
-        self.action = torch.tensor([random.randint(0, 4) for i in range(self.agent_numbers)])
+        # self.action = torch.tensor([random.randint(0, 4) for i in range(self.agent_numbers)])
         self.memory = []
         self.buffer_limit = 1000
 
@@ -58,6 +59,10 @@ class ReplayBuffer():
         self.loadWeight()
         if self.game.active and self.game.state < self.game_round:
             #observe part of the bot
+            action = self.select_action()
+            self.game.runOneRound([intoCommand(i, action[i]) for i in range(self.agent_numbers)])
+            score = self.game.outputScore()
+            reward = score - self.score
 
             self.states[0] = self.states[1]
             self.states[1] = self.states[2]
@@ -66,20 +71,12 @@ class ReplayBuffer():
             s = torch.from_numpy(s)
             self.states[3] = s
 
-            action = self.select_action()
-            self.game.runOneRound([intoCommand(i, action[i]) for i in range(self.agent_numbers)])
-            
-            score = self.game.outputScore()
-            reward = score - self.score
-            
-
             if verbose == 1:
                 print(score)
 
-            data = Data(self.states, self.action, reward, self.score)
+            data = Data(self.states, action, reward)
             self.memory.append(data)
 
-            self.action = action
             self.score = score
 
             if len(self.memory) > self.buffer_limit:
@@ -93,7 +90,7 @@ class ReplayBuffer():
             return torch.tensor([random.randint(0, 4) for i in range(self.agent_numbers)])
         else:
             with torch.no_grad():
-                return self.model(self.states[1:].unsqueeze(0)).max(2)[1].view(self.agent_numbers)
+                return self.model(self.states[1:].unsqueeze(0)).squeeze(0).max(1)[1].view(self.agent_numbers)
 
     def save_state(self, path):
         for i in range(self.agent_numbers):
@@ -134,12 +131,20 @@ class ReplayBuffer():
         self.score = self.game.outputScore()
 
         self.states = torch.zeros([4, self.agent_numbers, 3, self.height, self.width], dtype=torch.float32)
+        
+        s = np.array([self.game.outputAgentImage(i) for i in range(self.agent_numbers)]).astype(np.float32)
+        s = torch.from_numpy(s)
+        self.states[3] = s
+
         self.loadWeight()
         print('New Game!')
 
     def loadWeight(self):
         if os.path.exists(self.modelpath):
-            self.model.load_state_dict(torch.load(self.modelpath))
+            if self.cuda:
+                self.model.load_state_dict(torch.load(self.modelpath))
+            else:
+                self.model.load_state_dict(torch.load(self.modelpath, map_location='cpu'))
         else:
             print('Model weight [{0}] not found'.format(self.modelpath))
         return

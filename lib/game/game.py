@@ -127,13 +127,13 @@ class Game():
                 if area is agentId:
                     map[(y, x)] = [0, 102, 255]  # blue, this agent
                 elif area is State["emptyWhite"]:
-                    map[(y, x)] = [255, 255, 255]  # white
+                    map[(y, x)] = [0, 0, 0]  # black
                 elif area is State["emptyGray"]:
-                    map[(y, x)] = [204, 204, 204]  # gray
+                    map[(y, x)] = [127, 127, 127]  # gray
                 elif area is State["target"]:
                     map[(y, x)] = [255, 51, 0]  # red
                 elif area is State["obstacle"]:
-                    map[(y, x)] = [0, 0, 0]  # black
+                    map[(y, x)] = [255, 255, 255]  # white
                 else:
                     map[(y, x)] = [51, 204, 51]  # green, other agents
 

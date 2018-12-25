@@ -48,7 +48,10 @@ if cuda:
 action = torch.zeros([BATCH_SIZE, agent_num])
 
 for i in range(ITER):
-    buff.collect(0)
+    buff.collect(1)
+
+    if len(buff.memory) < BATCH_SIZE: continue
+
     batch = [random.choice(buff.memory) for j in range(BATCH_SIZE)]
 
     optim.zero_grad()
@@ -56,36 +59,37 @@ for i in range(ITER):
     states = torch.cat([batch[j].states.unsqueeze(0) for j in range(BATCH_SIZE)])
     action = torch.cat([batch[j].action.unsqueeze(0) for j in range(BATCH_SIZE)])
     reward = torch.tensor([batch[j].reward for j in range(BATCH_SIZE)]).view(-1, 1)
-    scores = torch.tensor([batch[j].scores for j in range(BATCH_SIZE)]).view(-1, 1)
+    # scores = torch.tensor([batch[j].scores for j in range(BATCH_SIZE)]).view(-1, 1)
     # print(scores.shape)
     if cuda:
         states = states.cuda()
         action = action.cuda()
         reward = reward.cuda()
-        scores = scores.cuda()
+        # scores = scores.cuda()
 
     action = action.long().view(BATCH_SIZE, agent_num, 1)
-    pred_scores = model(states[:,0:3]).gather(2, action) #(batch, agent, 1)
-    pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
-    target_scores = target_model(states[:,1:4]).max(2)[0].view(-1, 1) #(batch, agent, 1)
-    target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
-    pred_scores = pred_scores * 0.999 + reward
 
-    loss = 0.05 * criterion(pred_scores, target_scores) + criterion(pred_scores, scores)
+    pred_scores = model(states[:,:3]).gather(2, action) #(batch, agent, 1)
+    pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
+
+    target_scores = target_model(states[:,1:]).max(2)[0].view(-1, 1) #(batch, agent, 1)
+    target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
+
+    target_scores = target_scores * 0.999 + reward
+
+    loss = criterion(pred_scores, target_scores)
     
-    # pred_loss.backward()
     loss.backward()
     optim.step()
 
-    for param in model.parameters():
-        param.grad.data.clamp_(-1, 1)
+    # for param in model.parameters():
+    #     param.grad.data.clamp_(-1, 1)
 
     if i % TARGET_UPDATE == 0:
         target_model.load_state_dict(model.state_dict())
 
-    if (i + 1) % 100 == 0:
-        print('Iter:%d | loss:%.4f | scores:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), scores.item(), pred_scores.item(), target_scores.item()))
-
+    if (i + 1) % 1 == 0:
+        print('Iter:%d | loss:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), pred_scores.item(), target_scores.item()))
+    
     if (i + 1) % 100 == 0:
         torch.save(model.state_dict(), args.model_path)
-
