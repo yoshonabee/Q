@@ -56,6 +56,9 @@ class ReplayBuffer():
         self.initialGame()
 
     def collect(self, model, verbose=1):
+        if self.cuda:
+            self.model.cuda()
+            
         self.model.load_state_dict(model.state_dict())
         if self.game.active and self.game.state < self.game_round:
             #observe part of the bot
