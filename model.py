@@ -15,14 +15,14 @@ from torch.utils.data import Dataset, DataLoader
 class DQN(nn.Module):
     def __init__(self):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 16, 3, stride=1, padding=2)
+        self.conv1 = nn.Conv2d(3, 8, 3, stride=1, padding=2)
         self.maxp1 = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(16, 32, 3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(8, 16, 3, stride=1, padding=1)
         self.maxp2 = nn.MaxPool2d(2, 2)
-        self.conv3 = nn.Conv2d(32, 64, 3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(16, 32, 3, stride=1, padding=1)
         self.maxp3 = nn.MaxPool2d(2, 2)
 
-        self.linear = nn.Linear(3072, 5)
+        self.linear = nn.Linear(1536, 5)
 
     def forward(self, states):
         #shape of states: (batch, state_num, agent, 3, height, width)

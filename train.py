@@ -80,8 +80,6 @@ for i in range(ITER):
     for j in range(BATCH_SIZE):
         if done[j] is not True:
             target_scores[j] = target_model(states[j,1:].unsqueeze(0)).squeeze(0).max(1)[0].view(-1) #(batch, agent, 1)
-        else:
-            print('9m88')
 
     target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
