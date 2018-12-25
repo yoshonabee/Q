@@ -90,7 +90,11 @@ class ReplayBuffer():
             return torch.tensor([random.randint(0, 4) for i in range(self.agent_numbers)])
         else:
             with torch.no_grad():
-                return self.model(self.states[1:].unsqueeze(0)).squeeze(0).max(1)[1].view(self.agent_numbers)
+                if self.cuda:
+                    return self.model(self.states[1:].cuda().unsqueeze(0)).squeeze(0).max(1)[1].view(self.agent_numbers).cpu()
+                else:
+                    return self.model(self.states[1:].unsqueeze(0)).squeeze(0).max(1)[1].view(self.agent_numbers)
+
 
     def save_state(self, path):
         for i in range(self.agent_numbers):
