@@ -55,7 +55,7 @@ for i in range(ITER):
 
     batch = [random.choice(buff.memory) for j in range(BATCH_SIZE)]
 
-    optim.zero_grad()
+    
 
     states = torch.cat([batch[j].states.unsqueeze(0) for j in range(BATCH_SIZE)])
     action = torch.cat([batch[j].action.unsqueeze(0) for j in range(BATCH_SIZE)])
@@ -78,13 +78,14 @@ for i in range(ITER):
 
     target_scores = target_scores * 0.999 + reward
 
-    loss = criterion(pred_scores, target_scores)
-    
+    loss = F.smooth_l1_loss(pred_scores, target_scores)
+    optim.zero_grad()
     loss.backward()
-    optim.step()
-
     for param in model.parameters():
         param.grad.data.clamp_(-1, 1)
+    optim.step()
+
+    
 
     if i % TARGET_UPDATE == 0:
         target_model.load_state_dict(model.state_dict())
