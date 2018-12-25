@@ -17,11 +17,11 @@ RANDOM_THRES = 0.1
 
 
 class Data:
-    def __init__(self, states, action, reward):
+    def __init__(self, states, action, reward, done):
         self.states = states
         self.action = action
         self.reward = reward
-        # self.scores = scores
+        self.done = done
 
 class ReplayBuffer():
     def __init__(self, agent_num, height, width, model, modelpath, game_round, cuda=True):
@@ -58,7 +58,7 @@ class ReplayBuffer():
     def collect(self, model, verbose=1):
         if self.cuda:
             self.model.cuda()
-            
+
         self.model.load_state_dict(model.state_dict())
         if self.game.active and self.game.state < self.game_round:
             #observe part of the bot
@@ -77,7 +77,11 @@ class ReplayBuffer():
             if verbose == 1:
                 print(score)
 
-            data = Data(self.states, action, reward)
+            done = False
+            if self.game.active is False:
+                done = True
+
+            data = Data(self.states, action, reward, done)
             self.memory.append(data)
 
             self.score = score

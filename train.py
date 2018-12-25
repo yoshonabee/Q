@@ -30,7 +30,7 @@ if args.cuda != 'default':
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
     cuda = True
 
-buff = ReplayBuffer(agent_num, height, width, DQN(), args.model_path, 128)
+buff = ReplayBuffer(agent_num, height, width, DQN(), args.model_path, 128, cuda)
 
 model = DQN()
 target_model = DQN()
@@ -60,20 +60,23 @@ for i in range(ITER):
     states = torch.cat([batch[j].states.unsqueeze(0) for j in range(BATCH_SIZE)])
     action = torch.cat([batch[j].action.unsqueeze(0) for j in range(BATCH_SIZE)])
     reward = torch.tensor([batch[j].reward for j in range(BATCH_SIZE)]).view(-1, 1)
-    # scores = torch.tensor([batch[j].scores for j in range(BATCH_SIZE)]).view(-1, 1)
-    # print(scores.shape)
+    done = [batch[j].done for j in range(BATCH_SIZE)]
+
     if cuda:
         states = states.cuda()
         action = action.cuda()
         reward = reward.cuda()
-        # scores = scores.cuda()
 
     action = action.long().view(BATCH_SIZE, agent_num, 1)
 
     pred_scores = model(states[:,:3]).gather(2, action) #(batch, agent, 1)
     pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
-    target_scores = target_model(states[:,1:]).max(2)[0].view(-1, 1) #(batch, agent, 1)
+    target_scores = torch.zeros([BATCH_SIZE, agent_num, 5], dtype=torch.float32)
+    for j in range(BATCH_SIZE):
+        if done[j] is not True:
+            target_scores[j] = target_model(states[j,1:].unsqueeze(0)).squeeze(0).max(1)[0].view(-1) #(batch, agent, 1)
+
     target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
     target_scores = target_scores * 0.999 + reward
