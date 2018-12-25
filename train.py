@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from torch.optim import RMSprop
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 
 args = get_args()
 
@@ -73,6 +74,7 @@ for i in range(ITER):
     pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
     target_scores = target_model(states[:,1:]).max(2)[0].view(-1, 1) #(batch, agent, 1)
+    target_scores = F.relu(target_scores)
     target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
     target_scores = target_scores * 0.999 + reward

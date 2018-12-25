@@ -40,7 +40,7 @@ class ReplayBuffer():
         self.states = torch.zeros([4, self.agent_numbers, 3, self.height, self.width], dtype=torch.float32)
 
         #default score setting in the game
-        self.acquisition_sum = 700
+        self.acquisition_sum = 400
         self.explored_target_sum = 70
         self.explored_sum = 40
         self.time_decrease = -0.00005
