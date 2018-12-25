@@ -92,5 +92,5 @@ for i in range(ITER):
     if (i + 1) % 1 == 0:
         print('Iter:%d | loss:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), pred_scores.item(), target_scores.item()))
     
-    if (i + 1) % 100 == 0:
+    if (i + 1) % 1 == 0:
         torch.save(model.state_dict(), args.model_path)
