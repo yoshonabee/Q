@@ -16,7 +16,7 @@ args = get_args()
 keep_train = True
 cuda = False
 
-LR = 0.00001
+LR = 0.001
 
 ITER = 4000000
 BATCH_SIZE = 1
@@ -38,7 +38,7 @@ criterion = nn.MSELoss()
 optim = RMSprop(model.parameters(), lr=LR)
 
 if args.keep_train != 'default':
-    print(f'keep training, modelpath: {args.model_path}')
+    print('keep training, modelpath: {0}'.format(args.model_path))
     model.load_state_dict(torch.load(args.model_path))
 
 if cuda:
@@ -49,7 +49,7 @@ if cuda:
 action = torch.zeros([BATCH_SIZE, agent_num])
 
 for i in range(ITER):
-    buff.collect(1)
+    buff.collect(0)
 
     if len(buff.memory) < BATCH_SIZE: continue
 
@@ -90,7 +90,7 @@ for i in range(ITER):
     if i % TARGET_UPDATE == 0:
         target_model.load_state_dict(model.state_dict())
 
-    if (i + 1) % 1 == 0:
+    if (i + 1) % 100 == 0:
         print('Iter:%d | loss:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), pred_scores.item(), target_scores.item()))
     
     if (i + 1) % 100 == 0:

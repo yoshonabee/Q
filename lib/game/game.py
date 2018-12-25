@@ -85,7 +85,7 @@ class Game():
         # dead_ratio = 1 - active_counting / self.agents_number
         
         collected_targets_ratio = 1 - (len(self.godmap.targets) + len(self.consolemap.targets)) / self.targets_number
-        if collected_targets_ratio == 1 or dead_ratio >= 0.8:
+        if collected_targets_ratio == 1:
             self.active = False
     
     def tryOneRound(self, commands):
