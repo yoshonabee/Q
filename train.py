@@ -84,8 +84,8 @@ for i in range(ITER):
     loss.backward()
     optim.step()
 
-    # for param in model.parameters():
-    #     param.grad.data.clamp_(-1, 1)
+    for param in model.parameters():
+        param.grad.data.clamp_(-1, 1)
 
     if i % TARGET_UPDATE == 0:
         target_model.load_state_dict(model.state_dict())
