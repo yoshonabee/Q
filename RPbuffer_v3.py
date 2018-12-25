@@ -17,10 +17,11 @@ RANDOM_THRES = 0.1
 
 
 class Data:
-    def __init__(self, states, action, reward, done):
+    def __init__(self, states, action, reward, scores, done):
         self.states = states
         self.action = action
         self.reward = reward
+        self.scores = scores
         self.done = done
 
 class ReplayBuffer():
@@ -43,6 +44,7 @@ class ReplayBuffer():
         self.acquisition_sum = 400
         self.explored_target_sum = 70
         self.explored_sum = 40
+        self.total_score = self.acquisition_sum + self.explored_target_sum + self.explored_sum
         self.time_decrease = -0.00005
         self.crash_time_penalty = -0.0001
         self.crash_sum = -400
@@ -81,7 +83,7 @@ class ReplayBuffer():
             if self.game.active is False:
                 done = True
 
-            data = Data(self.states, action, reward, done)
+            data = Data(self.states, action, reward, self.total_score - self.score, done)
             self.memory.append(data)
 
             self.score = score
@@ -134,7 +136,7 @@ class ReplayBuffer():
         #initial the game envirnment for th replay buffer
         t = (self.height + self.width) / 2
 
-        self.game = Game(self.height, self.width)
+        self.game = Game(self.height, self.width, self.game_round)
         self.game.setRandomMap(self.agent_numbers, int(t * 0.3) ** 2, int(t * 0.1) ** 2)
         self.game.setScore(self.acquisition_sum, self.explored_target_sum, self.explored_sum, self.time_decrease, self.crash_time_penalty, self.crash_sum)
 

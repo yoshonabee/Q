@@ -4,9 +4,10 @@ import random
 import numpy as np
 
 class Game():
-    def __init__(self, height, width):
+    def __init__(self, height, width, game_round):
         self.height = height
         self.width = width
+        self.game_round = game_round
 
         #initial state of the game score calculatiing
         #score initial is zero
@@ -86,6 +87,9 @@ class Game():
         
         collected_targets_ratio = 1 - (len(self.godmap.targets) + len(self.consolemap.targets)) / self.targets_number
         if collected_targets_ratio == 1:
+            self.active = False
+
+        if self.state == self.game_round:
             self.active = False
     
     def tryOneRound(self, commands):

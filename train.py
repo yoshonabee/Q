@@ -30,7 +30,7 @@ if args.cuda != 'default':
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
     cuda = True
 
-buff = ReplayBuffer(agent_num, height, width, DQN(), args.model_path, 128, cuda)
+buff = ReplayBuffer(agent_num, height, width, DQN(), args.model_path, 10000, cuda)
 
 model = DQN()
 target_model = DQN()
@@ -60,12 +60,14 @@ for i in range(ITER):
     states = torch.cat([batch[j].states.unsqueeze(0) for j in range(BATCH_SIZE)])
     action = torch.cat([batch[j].action.unsqueeze(0) for j in range(BATCH_SIZE)])
     reward = torch.tensor([batch[j].reward for j in range(BATCH_SIZE)]).view(-1, 1)
+    scores = torch.tensor([batch[j].scores for j in range(BATCH_SIZE)]).view(-1, 1)
     done = [batch[j].done for j in range(BATCH_SIZE)]
 
     if cuda:
         states = states.cuda()
         action = action.cuda()
         reward = reward.cuda()
+        scores = scores.cuda()
 
     action = action.long().view(BATCH_SIZE, agent_num, 1)
 
@@ -85,7 +87,11 @@ for i in range(ITER):
 
     target_scores = target_scores * 0.999 + reward
 
+    reg = criterion(pred_scores, scores)
     loss = F.smooth_l1_loss(pred_scores, target_scores)
+
+    loss += 0.01 * reg
+    
     optim.zero_grad()
     loss.backward()
     for param in model.parameters():
@@ -98,7 +104,7 @@ for i in range(ITER):
         target_model.load_state_dict(model.state_dict())
 
     if (i + 1) % 1 == 0:
-        print('Iter:%d | loss:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), pred_scores.item(), target_scores.item()))
+        print('Iter:%d | loss:%.4f | scores:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), scores.item(), pred_scores.item(), target_scores.item()))
     
     if (i + 100) % 1 == 0:
         torch.save(model.state_dict(), args.model_path)
