@@ -26,8 +26,8 @@ class DQN(nn.Module):
         self.bn3 = nn.BatchNorm2d(64)
         self.maxp3 = nn.MaxPool2d(2, 2)
 
-        self.linear = nn.Linear(6912, 5)
-        self.bias = nn.Linear(6912, 1)
+        self.linear = nn.Linear(2304, 5)
+        self.bias = nn.Linear(2304, 1)
 
     def forward(self, states):
         #shape of states: (batch, state_num, agent, 3, height, width)
@@ -35,9 +35,10 @@ class DQN(nn.Module):
         for agent in range(states.shape[2]):
             # s1 = states[:,0,agent,:] #(batch, 3, 32, 32)
             # s2 = states[:,1,agent,:] #(batch, 3, 32, 32)
-            s3 = states[:,2,agent,:] #(batch, 3, 32, 32)
+            x = states[:,2,agent,:] #(batch, 3, 32, 32)
 
-            x = torch.cat([self.conv(s1), self.conv(s2), self.conv(s3)], 1)
+            # x = torch.cat([self.conv(s1), self.conv(s2), self.conv(s3)], 1)
+            x = self.conv(s)
             a = self.linear(x) #(batch, 1, 5)
             b = self.bias(x)
             x = ((a - torch.mean(a)) / torch.std(a) + b).unsqueeze(1)
