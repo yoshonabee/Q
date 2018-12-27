@@ -19,7 +19,7 @@ cuda = False
 LR = 0.001
 
 ITER = 4000000
-BATCH_SIZE = 8
+BATCH_SIZE = 1
 TARGET_UPDATE = 10
 
 height = int(args.height)
@@ -85,11 +85,10 @@ for i in range(ITER):
     target_scores = target_scores * 0.999 + reward
 
     loss = F.smooth_l1_loss(pred_scores, target_scores)
-
     optim.zero_grad()
     loss.backward()
-    for param in model.parameters():
-        param.grad.data.clamp_(-1, 1)
+    # for param in model.parameters():
+    #     param.grad.data.clamp_(-1, 1)
     optim.step()
 
     
