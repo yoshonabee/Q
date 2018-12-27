@@ -47,7 +47,7 @@ class ReplayBuffer():
         self.time_decrease = -0.00005
         self.crash_time_penalty = -0.0001
         self.crash_sum = -400
-        self.reg_val = 1
+        self.reg_val = 0.01
 
         # self.action = torch.tensor([random.randint(0, 4) for i in range(self.agent_num)])
         self.memory = []
