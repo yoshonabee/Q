@@ -7,9 +7,15 @@ from utils import *
 from model import *
 from RPbuffer_v3 import *
 
+cuda = False
+
 args = get_args()
 
-model = DQN()
+if args.cuda != 'default':
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
+    cuda = True
+    
+model = DQN(cuda)
 agent_num = int(args.agent_num)
 height = int(args.height)
 width = int(args.width)

@@ -31,10 +31,10 @@ if args.cuda != 'default':
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
     cuda = True
 
-buff = ReplayBuffer(agent_num, height, width, DQN(), args.model_path, 10000, cuda)
+buff = ReplayBuffer(agent_num, height, width, DQN(cuda), args.model_path, 10000, cuda)
 
-model = DQN()
-target_model = DQN()
+model = DQN(cuda)
+target_model = DQN(cuda)
 criterion = nn.MSELoss()
 optim = RMSprop(model.parameters(), lr=LR)
 
