@@ -72,7 +72,7 @@ class Game():
     def runOneRound(self, commands):
         self.state += 1
         self.reg = 0
-        # for command in commands:
+        for command in commands:
         #     if command.dx != 0 or command.dy != 0:
         #         self.reg += self.reg_val
 
