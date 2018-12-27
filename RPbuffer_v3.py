@@ -1,6 +1,7 @@
 import os
 import sys
 import datetime
+import math
 import numpy as np
 import torch
 import random
@@ -13,8 +14,10 @@ import matplotlib.pyplot as plt
 #--------------------------------------------------------------------------------
 #acting.py is the class for collect the training data from the game
 #--------------------------------------------------------------------------------
-RANDOM_THRES = 0.1
-
+EPS_START = 0.9
+EPS_END = 0.05
+EPS_DECAY = 200
+STEPS_DONE = 0
 
 class Data:
     def __init__(self, states, action, reward, done):
@@ -97,8 +100,13 @@ class ReplayBuffer():
             #only occur when the game is not active
             self.initialGame()
 
+    
     def select_action(self):
-        if random.random() < RANDOM_THRES + (100 / self.game.state) ** 1 / 2:
+        global STEPS_DONE
+        eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * STEPS_DONE / EPS_DECAY)
+        STEPS_DONE += 1
+
+        if random.random() > eps_threshold:
             return torch.tensor([random.randint(0, 4) for i in range(self.agent_num)])
         else:
             with torch.no_grad():
