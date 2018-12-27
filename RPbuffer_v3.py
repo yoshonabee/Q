@@ -88,7 +88,7 @@ class ReplayBuffer():
             data = Data(self.states, action, torch.from_numpy(reward).float(), done)
             self.memory.append(data)
 
-            self.score = score
+            self.score = np.array([self.game.outputScore()] * self.agent_num)
 
             if len(self.memory) > self.buffer_limit:
                 self.memory.remove(self.memory[0])
