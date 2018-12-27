@@ -59,20 +59,17 @@ for i in range(ITER):
 
     states = torch.cat([batch[j].states.unsqueeze(0) for j in range(BATCH_SIZE)])
     action = torch.cat([batch[j].action.unsqueeze(0) for j in range(BATCH_SIZE)])
-    reward = torch.tensor([batch[j].reward for j in range(BATCH_SIZE)]).view(-1, 1)
-    scores = torch.tensor([batch[j].scores for j in range(BATCH_SIZE)]).view(-1, 1)
+    reward = torch.cat([batch[j].reward.unsqueeze(0) for j in range(BATCH_SIZE)]).unsqueeze(2)
     done = [batch[j].done for j in range(BATCH_SIZE)]
 
     if cuda:
         states = states.cuda()
         action = action.cuda()
         reward = reward.cuda()
-        scores = scores.cuda()
 
     action = action.long().view(BATCH_SIZE, agent_num, 1)
 
     pred_scores = model(states[:,:3]).gather(2, action) #(batch, agent, 1)
-    pred_scores = torch.mean(pred_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
     if cuda:
         target_scores = torch.zeros([BATCH_SIZE, agent_num, 5], dtype=torch.float32).cuda()
@@ -82,8 +79,6 @@ for i in range(ITER):
     for j in range(BATCH_SIZE):
         if done[j] is not True:
             target_scores[j] = target_model(states[j,1:].unsqueeze(0)).squeeze(0).max(1)[0].view(-1) #(batch, agent, 1)
-
-    target_scores = torch.mean(target_scores.view(BATCH_SIZE, -1), 1) #(batch, 1)
 
     target_scores = target_scores * 0.999 + reward
 
@@ -101,7 +96,7 @@ for i in range(ITER):
         target_model.load_state_dict(model.state_dict())
 
     if (i + 1) % 100 == 0:
-        print('Iter:%d | loss:%.4f | scores:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), scores[0].item(), pred_scores[0].item(), target_scores[0].item()))
+        print('Iter:%d | loss:%.4f | pred_scores:%.4f | target_scores:%.4f' %(i + 1, loss.item(), torch.mean(pred_scores[0]).item(), torch.mean(target_scores[0]).item()))
     
     if (i + 1) % 100 == 0:
         torch.save(model.state_dict(), args.model_path)

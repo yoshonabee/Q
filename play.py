@@ -12,5 +12,5 @@ model = DQN()
 
 buff = ReplayBuffer(3, 32, 32, DQN(), 'model/qq.pkl', 128, False)
 
-# buff.play(model, 128)
-buff.save_state('./')
+buff.play(model, 128)
+# buff.save_state('./')

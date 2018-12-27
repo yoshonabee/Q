@@ -92,18 +92,18 @@ class Game():
         if self.state == self.game_round:
             self.active = False
     
-    def tryOneRound(self, commands):
+    def tryOneRound(self, command):
         consolemap = self.consolemap
-        for command in commands:
-            agent = consolemap.agents[command.id]
-            agent.move(command.dx, command.dy, consolemap)
-            (areas, foundTargets, foundObstacles) = agent.observe(self.godmap)
-            consolemap.updateObserveAreas(areas)
-            consolemap.updateTargets(foundTargets)
-            consolemap.updateObstacles(foundObstacles)
-            consolemap.updateAgent(agent) # must at the end
 
-        return outputScore(consolemap)
+        agent = consolemap.agents[command.id]
+        agent.move(command.dx, command.dy, consolemap)
+        (areas, foundTargets, foundObstacles) = agent.observe(self.godmap)
+        consolemap.updateObserveAreas(areas)
+        consolemap.updateTargets(foundTargets)
+        consolemap.updateObstacles(foundObstacles)
+        consolemap.updateAgent(agent) # must at the end
+
+        return self.outputScore(consolemap)
 
     def printConsoleInfo(self):
         agents = []
