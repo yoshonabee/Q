@@ -72,9 +72,9 @@ class Game():
     def runOneRound(self, commands):
         self.state += 1
         self.reg = 0
-        for command in commands:
-            if command.dx != 0 or command.dy != 0:
-                self.reg += self.reg_val
+        # for command in commands:
+        #     if command.dx != 0 or command.dy != 0:
+        #         self.reg += self.reg_val
 
             agent = self.consolemap.agents[command.id]
             agent.move(command.dx, command.dy, self.consolemap)
@@ -102,8 +102,8 @@ class Game():
         consolemap = self.consolemap
 
         self.reg = 0
-        if command.dx != 0 or command.dy != 0:
-            self.reg += self.reg_val
+        # if command.dx != 0 or command.dy != 0:
+        #     self.reg += self.reg_val
 
         agent = consolemap.agents[command.id]
         agent.move(command.dx, command.dy, consolemap)
