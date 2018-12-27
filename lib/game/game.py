@@ -15,6 +15,7 @@ class Game():
         self.targets_number = 0
         self.state = 0
 
+        self.reg = None
         # godmap will be asked when agent observing
         # only god knows target and obstacles at the beginning
         self.godmap = GodMap(height, width)
@@ -56,7 +57,7 @@ class Game():
             agents[id] = agent
         self.setAgents(agents)
 
-    def setScore(self, acquisition_sum, explored_sum, explored_target_sum, time_decrease, crash_time_penalty, crash_sum):
+    def setScore(self, acquisition_sum, explored_sum, explored_target_sum, time_decrease, crash_time_penalty, crash_sum, reg_val):
         #the score calculating standard of the game
         self.acquisition_sum = acquisition_sum
         self.explored_sum = explored_sum
@@ -64,12 +65,17 @@ class Game():
         self.time_decrease = time_decrease
         self.crash_time_penalty = crash_time_penalty
         self.crash_sum = crash_sum
+        self.reg_val = reg_val
 
         self.score = 0
 
     def runOneRound(self, commands):
         self.state += 1
+        self.reg = 0
         for command in commands:
+            if command.dx != 0 or command.dy != 0:
+                self.reg += self.reg_val
+
             agent = self.consolemap.agents[command.id]
             agent.move(command.dx, command.dy, self.consolemap)
             (areas, foundTargets, foundObstacles) = agent.observe(self.godmap)
@@ -94,6 +100,10 @@ class Game():
     
     def tryOneRound(self, command):
         consolemap = self.consolemap
+
+        self.reg = 0
+        if command.dx != 0 or command.dy != 0:
+            self.reg += self.reg_val
 
         agent = consolemap.agents[command.id]
         agent.move(command.dx, command.dy, consolemap)
@@ -190,7 +200,7 @@ class Game():
 
         dead_ratio = 1 - active_counting / self.agents_number
 
-        score = self.state * (self.time_decrease + self.crash_time_penalty * dead_ratio) + self.explored_target_sum * explored_target_ratio + explored_ratio * self.explored_sum + collected_targets_ratio * self.acquisition_sum + self.crash_sum * dead_ratio
+        score = self.state * (self.time_decrease + self.crash_time_penalty * dead_ratio) + self.explored_target_sum * explored_target_ratio + explored_ratio * self.explored_sum + collected_targets_ratio * self.acquisition_sum + self.crash_sum * dead_ratio + self.reg
 
         return score
 

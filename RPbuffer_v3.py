@@ -47,6 +47,7 @@ class ReplayBuffer():
         self.time_decrease = -0.00005
         self.crash_time_penalty = -0.0001
         self.crash_sum = -400
+        self.reg_val = 1
 
         # self.action = torch.tensor([random.randint(0, 4) for i in range(self.agent_num)])
         self.memory = []
@@ -140,7 +141,7 @@ class ReplayBuffer():
 
         self.game = Game(self.height, self.width, self.game_round)
         self.game.setRandomMap(self.agent_num, int(t * 0.3) ** 2, int(t * 0.1) ** 2)
-        self.game.setScore(self.acquisition_sum, self.explored_target_sum, self.explored_sum, self.time_decrease, self.crash_time_penalty, self.crash_sum)
+        self.game.setScore(self.acquisition_sum, self.explored_target_sum, self.explored_sum, self.time_decrease, self.crash_time_penalty, self.crash_sum, self.reg_val)
 
         self.game.runOneRound([Command(i, 0, 0) for i in range(self.agent_num)])
         self.score = np.array([self.game.outputScore() for i in range(self.agent_num)])
