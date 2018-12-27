@@ -77,8 +77,12 @@ class DQN(nn.Module):
             # s2 = states[:,1,agent,:] #(batch, 3, 32, 32)
             x = states[:,2,agent,:] #(batch, 3, 32, 32)
 
-            agent_vec = self.embed(torch.tensor([agent] * states.shape[0]))
+            agent_vec = torch.tensor([agent] * states.shape[0])
+            if torch.cuda.available():
+                agent_vec = agent_vec.cuda()
 
+            agent_vec = self.embed(agent_vec)
+            
             # x = torch.cat([self.conv(s1), self.conv(s2), self.conv(s3)], 1)
             x = torch.cat([self.conv(x), agent_vec], 1)
             a = self.linear(x) #(batch, 1, 5)

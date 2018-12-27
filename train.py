@@ -20,7 +20,7 @@ cuda = False
 LR = 0.001
 
 ITER = 4000000
-BATCH_SIZE = 1
+BATCH_SIZE = 8
 TARGET_UPDATE = 10
 
 height = int(args.height)
