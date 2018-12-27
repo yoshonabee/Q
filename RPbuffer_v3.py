@@ -98,7 +98,7 @@ class ReplayBuffer():
             self.initialGame()
 
     def select_action(self):
-        if random.random() < RANDOM_THRES:
+        if random.random() < RANDOM_THRES + (100 / self.game.state) ** 1 / 2:
             return torch.tensor([random.randint(0, 4) for i in range(self.agent_num)])
         else:
             with torch.no_grad():

@@ -38,7 +38,7 @@ class DQN(nn.Module):
             x = states[:,2,agent,:] #(batch, 3, 32, 32)
 
             # x = torch.cat([self.conv(s1), self.conv(s2), self.conv(s3)], 1)
-            x = self.conv(s)
+            x = self.conv(x)
             a = self.linear(x) #(batch, 1, 5)
             b = self.bias(x)
             x = ((a - torch.mean(a)) / torch.std(a) + b).unsqueeze(1)
