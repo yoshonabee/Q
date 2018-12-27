@@ -33,8 +33,8 @@ class DQN(nn.Module):
         #shape of states: (batch, state_num, agent, 3, height, width)
         scores = []
         for agent in range(states.shape[2]):
-            s1 = states[:,0,agent,:] #(batch, 3, 32, 32)
-            s2 = states[:,1,agent,:] #(batch, 3, 32, 32)
+            # s1 = states[:,0,agent,:] #(batch, 3, 32, 32)
+            # s2 = states[:,1,agent,:] #(batch, 3, 32, 32)
             s3 = states[:,2,agent,:] #(batch, 3, 32, 32)
 
             x = torch.cat([self.conv(s1), self.conv(s2), self.conv(s3)], 1)
