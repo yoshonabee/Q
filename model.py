@@ -51,7 +51,7 @@ from torch.utils.data import Dataset, DataLoader
 
 
 class DQN(nn.Module):
-    def __init__(self, cuda):
+    def __init__(self, c):
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, 1, stride=1)
         self.bn1 = nn.BatchNorm2d(16)
@@ -69,7 +69,7 @@ class DQN(nn.Module):
         self.linear = nn.Linear(2432, 5)
         self.bias = nn.Linear(2432, 1)
 
-        self.cuda = cuda
+        self.c = c
 
     def forward(self, states):
         #shape of states: (batch, state_num, agent, 3, height, width)
@@ -80,8 +80,8 @@ class DQN(nn.Module):
             x = states[:,2,agent,:] #(batch, 3, 32, 32)
 
             agent_vec = torch.tensor([agent] * states.shape[0])
-            if self.cuda:
-                agent_vec = agent_vec.cuda()
+            if self.c:
+                agent_vec = agent_vec.c()
 
             agent_vec = self.embed(agent_vec)
             
