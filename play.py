@@ -7,10 +7,16 @@ from utils import *
 from model import *
 from RPbuffer_v3 import *
 
-model = DQN()
-# model.load_state_dict(torch.load('model/q.pkl', map_location='cpu'))
+args = get_args()
 
-buff = ReplayBuffer(3, 32, 32, DQN(), 'model/qq.pkl', 128, False)
+model = DQN()
+agent_num = int(args.agent_num)
+height = int(args.height)
+width = int(args.width)
+
+model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
+
+buff = ReplayBuffer(agent_num, height, width, DQN(), 'model/qq.pkl', 128, False)
 
 buff.play(model, 128)
 # buff.save_state('./')
