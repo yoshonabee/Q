@@ -23,7 +23,7 @@ BATCH_SIZE = 1
 TARGET_UPDATE = 10
 
 height = int(args.height)
-width = int(args.weight)
+width = int(args.width)
 agent_num = int(args.agent_num)
 
 if args.cuda != 'default':

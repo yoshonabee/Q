@@ -18,7 +18,7 @@ def get_args():
     parser = ArgumentParser()
     parser.add_argument('model_path', help="modelpath")
     parser.add_argument('height', help='height')
-    parser.add_argument('weight', help='weight')
+    parser.add_argument('width', help='width')
     parser.add_argument('agent_num', help='agent number')
     parser.add_argument('-c', dest='cuda', help='cuda number', default='default')
     parser.add_argument("-k", help="keep train", dest="keep_train", default="default")
