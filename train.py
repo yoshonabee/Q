@@ -81,7 +81,7 @@ for i in range(ITER):
             target_scores[j] = target_model(states[j,1:].unsqueeze(0)).squeeze(0).max(1)[0].view(-1) #(batch, agent, 1)
 
     # print(reward)
-    
+
     target_scores = target_scores * 0.999 + reward
 
     loss = F.smooth_l1_loss(pred_scores, target_scores)
