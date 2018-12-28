@@ -66,8 +66,10 @@ class DQN(nn.Module):
 
         self.embed = nn.Embedding(20, 128)
 
-        self.linear = nn.Linear(2432, 5)
-        self.bias = nn.Linear(2432, 1)
+        self.linear = nn.Linear(256, 5)
+        self.l1 = nn.Linear(2432, 256)
+        self.l2 = nn.Linear(2432, 256)
+        self.bias = nn.Linear(256, 1)
 
         self.c = c
 
@@ -81,14 +83,14 @@ class DQN(nn.Module):
 
             agent_vec = torch.tensor([agent] * states.shape[0])
             if self.c:
-                agent_vec = agent_vec.c()
+                agent_vec = agent_vec.cuda()
 
             agent_vec = self.embed(agent_vec)
             
             # x = torch.cat([self.conv(s1), self.conv(s2), self.conv(s3)], 1)
             x = torch.cat([self.conv(x), agent_vec], 1)
-            a = self.linear(x) #(batch, 1, 5)
-            b = self.bias(x)
+            a = self.linear(self.l1(x)) #(batch, 1, 5)
+            b = self.bias(self.l2(x))
             x = ((a - torch.mean(a)) / torch.std(a) + b).unsqueeze(1)
 
             scores.append(x)
