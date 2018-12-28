@@ -36,7 +36,8 @@ buff = ReplayBuffer(agent_num, height, width, AE(), args.model_path, 10000, cuda
 model = AE()
 embed = Embedding()
 criterion = nn.MSELoss()
-optim = RMSprop(model.parameters(), lr=LR)
+optim = Adam(model.parameters(), lr=LR)
+embed_optim = Adam(embed.parameters(), lr=LR)
 
 if args.keep_train != 'default':
     print('keep training, modelpath: {0}'.format(args.model_path))
@@ -65,6 +66,7 @@ for i in range(ITER):
     if cuda:
         states = states.cuda()
         action = action.cuda()
+        next_states = next_states.cuda()
 
     action = action.long().view(BATCH_SIZE, agent_num, 1)
 
@@ -82,6 +84,7 @@ for i in range(ITER):
     # for param in model.parameters():
     #     param.grad.data.clamp_(-1, 1)
     optim.step()
+    embed_optim.step()
 
     if (i + 1) % 100 == 0:
         print('Iter:%d | loss:%.4f' %(i + 1, loss.item()))
