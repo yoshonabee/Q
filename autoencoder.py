@@ -42,6 +42,7 @@ embed_optim = Adam(embed.parameters(), lr=LR)
 if args.keep_train != 'default':
     print('keep training, modelpath: {0}'.format(args.model_path))
     model.load_state_dict(torch.load(args.model_path))
+    embed.load_state_dict(torch.load('model/embed.pkl'))
 
 if cuda:
     model.cuda()
@@ -91,3 +92,4 @@ for i in range(ITER):
     
     if (i + 1) % 100 == 0:
         torch.save(model.state_dict(), args.model_path)
+        torch.save(embed.state_dict(), 'model/embed.pkl')
