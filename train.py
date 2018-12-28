@@ -79,7 +79,7 @@ for i in range(ITER):
 
     for j in range(BATCH_SIZE):
         if done[j] is not True:
-            target_scores[j] = target_model(states[j,1:].unsqueeze(0)).squeeze(0).max(1)[0].view(-1) #(batch, agent, 1)
+            target_scores[j] = target_model(states[j,1:].unsqueeze(0)).squeeze(0).max(1)[0].view(agent_num, 1) #(batch, agent, 1)
 
     # print(reward)
 
