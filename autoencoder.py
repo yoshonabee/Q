@@ -8,7 +8,7 @@ import sys
 
 import numpy as np
 import torch
-from torch.optim import RMSprop
+from torch.optim import RMSprop, Adam
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 
